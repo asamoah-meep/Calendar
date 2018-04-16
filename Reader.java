@@ -17,7 +17,6 @@ public class Reader {
 			 * 11 is type
 			 */
 			Appointment a = new Appointment(rawData[0]+ rawData[1], rawData[4],rawData[6], rawData[11]);
-			System.out.println(a.toString());
 			if(!(allAppointments.contains(a)))
 					allAppointments.add(a);
 		}

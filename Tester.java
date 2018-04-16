@@ -22,13 +22,20 @@ import javax.swing.*;
 
 public class Tester {
 	
-	private static final int NOTIFICATION_TIME = 5;
+	private static final int NOTIFICATION_TIME = 12;
 	private static volatile boolean popRunning = true;
 
-	public static void main(String[] args) throws IOException, InterruptedException {
-		
-		ArrayList<Appointment> a = Reader.readFile();
-		checkReminder(a);
+	public static void main(String[] args)
+			throws IOException, InterruptedException {
+					
+			ArrayList<Appointment> a = Reader.readFile();
+			while(true) {
+
+				checkReminder(a);
+				
+				//TimeUnit.MINUTES.sleep(2);
+			TimeUnit.SECONDS.sleep(30);
+		}
 				
 		
 		//System.exit(0);
@@ -42,7 +49,6 @@ public class Tester {
 		Calendar c = Calendar.getInstance(t);
 		String[] s = c.getTime().toString().split(" ");
 		// Week, Month, Day in Month, time(24hr), timezone, yr
-		System.out.println(Arrays.toString(s));
 		
 		String currentDate = String.format("%s %s %s", s[1],s[2],s[5]);
 		//Month, Day in Month, year
@@ -63,15 +69,15 @@ public class Tester {
 			
 			int x = iMH-currentMH;
 						
-			if((x >=0 && x<=10)&& currentDate.equals(i.getDate()) ){
+			if((x >=0 && x<=10)&& currentDate.equals(i.getDate()) && !i.getShown()){
 				createReminder(i);
-				System.out.printf("Current Time = %d\t Appointment Time = %d\n", currentMH, iMH);
 			}
 		}
 	}
 		
 	public static void createReminder(Appointment input) throws InterruptedException{
-	
+		
+		input.setShown(true);
 		
 		final JFrame f = new JFrame();
 		f.setIconImage(new ImageIcon("src//calendar.png").getImage());		
@@ -86,7 +92,7 @@ public class Tester {
 			//Do nothing
 		}
 			
-		final JLabel l = new JLabel(String.format("%s has a(n) %s at %s%s", input.getName(), input.getType(), input.getTime(),input.getAP()), JLabel.CENTER);
+		final JLabel l = new JLabel(String.format("%s--%s--%s", input.getType(), input.getName(), input.getTime()), JLabel.CENTER);
 		l.setForeground(Color.WHITE);
 		l.setFont(new Font("Arial", Font.BOLD, 40));
 		final JDialog dialog = new JDialog(f,"Appointment", true);
@@ -107,7 +113,7 @@ public class Tester {
 			Clip c = AudioSystem.getClip();
 			AudioInputStream in = AudioSystem.getAudioInputStream(soundFile);
 			c.open(in);
-			c.start();
+			//c.start();
 		}catch(LineUnavailableException | IOException |UnsupportedAudioFileException e){
 			e.printStackTrace();
 		}
@@ -126,7 +132,7 @@ public class Tester {
 		TimeUnit.SECONDS.sleep(NOTIFICATION_TIME);
 		dialog.dispose();
 		popRunning = false;
-
+		
 		
 	}
 

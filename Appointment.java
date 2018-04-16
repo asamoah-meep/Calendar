@@ -2,6 +2,7 @@ package cal;
 
 public class Appointment {
 	
+	private boolean shown;
 	private String date;
 	private String ap;
 	//MMM DD, YYYY
@@ -21,6 +22,13 @@ public class Appointment {
 		this.name = name;
 		this.type = type;
 		this.ap = "am";
+		this.shown = false;
+	}
+	public void setShown(boolean shown) {
+		this.shown = shown;
+	}
+	public boolean getShown() {
+		return shown;
 	}
 	public String getAP(){
 		return ap;
