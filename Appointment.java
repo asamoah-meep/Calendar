@@ -1,9 +1,9 @@
 package cal;
-import java.util.Calendar;
 
 public class Appointment {
 	
 	private String date;
+	private String ap;
 	//MMM DD, YYYY
 	//Ex: Feb 03, 2018
 	private String time;
@@ -20,6 +20,13 @@ public class Appointment {
 		this.time = time;
 		this.name = name;
 		this.type = type;
+		this.ap = "am";
+	}
+	public String getAP(){
+		return ap;
+	}
+	public void setAP(String ap){
+		this.ap= ap;
 	}
 	public String getDate() {
 		return date;
@@ -58,9 +65,6 @@ public class Appointment {
 	public String toString(){
 		return String.format("%s\t%s\t%s\t%s\n", this.date, this.time, this.name, this.type);
 
-	}
-	
-	public void reminder(Calendar current){
 	}
 	
 

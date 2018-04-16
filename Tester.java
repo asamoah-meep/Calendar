@@ -1,5 +1,11 @@
 package cal;
 
+import java.awt.Color;
+import java.awt.Dimension;
+import java.awt.Font;
+import java.awt.Toolkit;
+import java.awt.event.WindowEvent;
+import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -7,36 +13,25 @@ import java.util.Calendar;
 import java.util.TimeZone;
 import java.util.concurrent.TimeUnit;
 
+import javax.sound.sampled.AudioInputStream;
+import javax.sound.sampled.AudioSystem;
+import javax.sound.sampled.Clip;
+import javax.sound.sampled.LineUnavailableException;
+import javax.sound.sampled.UnsupportedAudioFileException;
 import javax.swing.*;
 
 public class Tester {
+	
+	private static final int NOTIFICATION_TIME = 5;
+	private static volatile boolean popRunning = true;
 
 	public static void main(String[] args) throws IOException, InterruptedException {
-		// TODO Auto-generated method stub
 		
 		ArrayList<Appointment> a = Reader.readFile();
 		checkReminder(a);
+				
 		
-//		final JFrame f = new JFrame();
-//		final JOptionPane j = new JOptionPane("Hello!");
-//		final JDialog dialog = new JDialog(f,"Test", true);
-//		dialog.setContentPane(j);
-//		
-//		dialog.pack();
-//		
-//		Thread t = new Thread(new Runnable(){
-//			public void run(){
-//				dialog.setVisible(true);
-//			}
-//		});
-//		t.start();
-//		TimeUnit.SECONDS.sleep(3);
-//		dialog.dispose();
-//
-//		System.exit(0);
-		
-		//JOptionPane.showMessageDialog(null, "hello!");
-		
+		//System.exit(0);
 	}
 	
 	public static void checkReminder(ArrayList<Appointment> a) throws InterruptedException{
@@ -52,11 +47,6 @@ public class Tester {
 		String currentDate = String.format("%s %s %s", s[1],s[2],s[5]);
 		//Month, Day in Month, year
 		
-		System.out.println(currentDate);
-		
-		Appointment test = new Appointment("Apr 04 2018", "03:49:00", "Jeff", "3D print");
-		System.out.println(test.getDate());
-		
 		String timeData[] = s[3].split(":");
 		//hr,min,sec
 		int currentHr = Integer.parseInt(timeData[0]);
@@ -65,47 +55,79 @@ public class Tester {
 		int currentMH = currentHr*60 + currentMin;
 		//total min
 		
-		System.out.println(test.toString());
-		
-		String testData[] = test.getTime().split(":");
-		int dateHr = Integer.parseInt(testData[0]);
-		int dateMin = Integer.parseInt(testData[1]);
-		int dateMH = dateHr*60 + dateMin;
-		
-		createReminder(test);
-		
-//		for(Appointment i: a){
-//			String iData[] = i.getDate().split(":");
-//			int iHr = Integer.parseInt(iData[0]);
-//			int iMin = Integer.parseInt(iData[1]);
-//			int iMH = iHr*60 + iMH;
-//			
-//			while(dateMH - iMH <= 10)
-//
-//				createReminder(i);
-//		}
+		for(Appointment i: a){
+			String iData[] = i.getTime().split(":");
+			int iHr = Integer.parseInt(iData[0]);
+			int iMin = Integer.parseInt(iData[1]);
+			int iMH = iHr*60 + iMin;
+			
+			int x = iMH-currentMH;
+						
+			if((x >=0 && x<=10)&& currentDate.equals(i.getDate()) ){
+				createReminder(i);
+				System.out.printf("Current Time = %d\t Appointment Time = %d\n", currentMH, iMH);
+			}
+		}
 	}
-	
+		
 	public static void createReminder(Appointment input) throws InterruptedException{
+	
 		
 		final JFrame f = new JFrame();
-		final JOptionPane j = new JOptionPane(String.format("%s has an appointment at %s", input.getName(), input.getTime()));
+		f.setIconImage(new ImageIcon("src//calendar.png").getImage());		
+		try{
+			if(Double.parseDouble(input.getTime().substring(0,2))>12){
+				input.setAP("pm");
+				input.setTime(Integer.toString((int)Double.parseDouble(input.getTime().substring(0,2))%12) + input.getTime().substring(2));
+			}
+			else if(Double.parseDouble(input.getTime().substring(0,2))==12)
+					input.setAP("pm");
+		}catch(NumberFormatException e){
+			//Do nothing
+		}
+			
+		final JLabel l = new JLabel(String.format("%s has a(n) %s at %s%s", input.getName(), input.getType(), input.getTime(),input.getAP()), JLabel.CENTER);
+		l.setForeground(Color.WHITE);
+		l.setFont(new Font("Arial", Font.BOLD, 40));
 		final JDialog dialog = new JDialog(f,"Appointment", true);
-		dialog.setContentPane(j);
+		dialog.setContentPane(l);		
 		
+		Dimension d = Toolkit.getDefaultToolkit().getScreenSize();
+		
+		dialog.setBackground(new Color(87,6,140));
 		dialog.pack();
+		int x = dialog.getWidth();
+		int y = dialog.getHeight();
+		dialog.setLocation(d.width/2-(x/2), d.height/4-(y/2));
 		
-		Thread t = new Thread(new Runnable(){
+		File soundFile = new File(String.format("src%sfront-desk-bells-daniel_simon.wav", File.separator));		
+
+		
+		try{
+			Clip c = AudioSystem.getClip();
+			AudioInputStream in = AudioSystem.getAudioInputStream(soundFile);
+			c.open(in);
+			c.start();
+		}catch(LineUnavailableException | IOException |UnsupportedAudioFileException e){
+			e.printStackTrace();
+		}
+		
+		
+		Thread pop = new Thread(new Runnable(){
+			@Override
 			public void run(){
+				//while(popRunning){
 				dialog.setVisible(true);
+				//}
 			}
 		});
-		t.start();
-		TimeUnit.SECONDS.sleep(3);
-		dialog.dispose();
 		
-		//System.exit(0);
+		pop.start();
+		TimeUnit.SECONDS.sleep(NOTIFICATION_TIME);
+		dialog.dispose();
+		popRunning = false;
 
+		
 	}
 
 }

@@ -5,7 +5,7 @@ import java.util.ArrayList;
 public class Reader {
 	
 	public static ArrayList<Appointment> readFile() throws IOException{
-		BufferedReader r = new BufferedReader(new InputStreamReader(new FileInputStream(new File("src//data.csv"))));
+		BufferedReader r = new BufferedReader(new InputStreamReader(new FileInputStream(new File(String.format("src%sdata.csv", File.separator)))));
 		String s = "";
 		ArrayList<Appointment> allAppointments = new ArrayList<Appointment>();
 		s =r.readLine();
